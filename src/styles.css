@@ -66,3 +66,77 @@ button:hover:not(:disabled){transform:translateY(-1px)}button:active:not(:disabl
 .dashboard-side .mt-4.space-y-2\.5 .quick-action:nth-child(4) svg{color:var(--warning)}
 .dashboard-side .mt-4.space-y-2\.5 .quick-action:nth-child(5) svg{color:var(--accent-blue)}
 body::before{box-shadow:0 0 0 54px color-mix(in srgb,var(--accent-blue) 6%,transparent),0 0 0 108px color-mix(in srgb,var(--foreground) 4%,transparent),0 0 0 162px color-mix(in srgb,var(--accent-lilac) 5%,transparent)}
+
+/* Keep the dashboard spacious beside its fixed desktop navigation. */
+@media (min-width: 900px) and (max-width: 1279px) {
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dashboard-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px;
+  }
+  .dashboard-side.space-y-5 > :not(:first-child) {
+    margin-top: 0;
+  }
+}
+
+/* Tone the ambient artwork down so it frames, rather than competes with, content. */
+body {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--foreground) 2.5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--foreground) 2.5%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+body::before {
+  border-color: color-mix(in srgb, var(--primary) 15%, transparent);
+  box-shadow:
+    0 0 0 54px color-mix(in srgb, var(--accent-blue) 4%, transparent),
+    0 0 0 108px color-mix(in srgb, var(--foreground) 2.5%, transparent),
+    0 0 0 162px color-mix(in srgb, var(--accent-lilac) 3%, transparent);
+}
+body::after {
+  opacity: 0.62;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 60;
+  top: 12px;
+  left: 12px;
+  padding: 10px 14px;
+  transform: translateY(-160%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  font-weight: 650;
+  transition: transform 180ms ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.seal-watermark {
+  position: fixed;
+  z-index: 0;
+  top: 50%;
+  right: clamp(-40px, 3vw, 48px);
+  width: clamp(280px, 36vw, 450px);
+  height: auto;
+  transform: translateY(-50%);
+  opacity: 0.28;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 899px) {
+  .seal-watermark {
+    top: 42%;
+    right: -4%;
+    width: min(78vw, 340px);
+    opacity: 0.2;
+  }
+}

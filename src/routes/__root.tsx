@@ -155,6 +155,15 @@ function RootComponent() {
       <ThemeAndServices />
       <CloudSync />
       <div className="grain-layer" aria-hidden="true" />
+      <img
+        className="seal-watermark"
+        src="/nit-hamirpur-seal.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <div className="app-shell">
         <aside className="desktop-sidebar">
           <Link to="/" className="brand-block">
@@ -177,7 +186,9 @@ function RootComponent() {
             <div><p className="eyebrow">NIT HAMIRPUR</p><h1>Attendance tracker</h1></div>
             <div className="topbar-user"><span className="profile-avatar small">{initials}</span><span>{profileName}</span></div>
           </header>
-          <main className="page-content"><Outlet /></main>
+          <div id="main-content" className="page-content" tabIndex={-1}>
+            <Outlet />
+          </div>
           <footer className="mx-auto max-w-[1480px] px-4 pb-24 pt-2 text-center text-[10px] text-muted-foreground md:px-8 md:pb-5">
             Created by Harshit Kansal
           </footer>
