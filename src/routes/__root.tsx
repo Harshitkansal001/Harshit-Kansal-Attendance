@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { BottomNav } from "../components/BottomNav";
+import { CloudSync } from "../components/CloudSync";
 import { useAppState } from "../lib/store";
 import { setupPWA } from "../lib/pwa";
 import { startNotificationScheduler } from "../lib/notifications";
@@ -151,6 +152,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeAndServices />
+      <CloudSync />
       <div className="app-shell">
         <aside className="desktop-sidebar">
           <Link to="/" className="brand-block">

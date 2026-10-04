@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Download, Upload, RotateCcw, Trash2, Moon, Sun, MonitorSmartphone, Bell, FileJson, FileSpreadsheet } from "lucide-react";
+import { Download, Upload, RotateCcw, Trash2, Moon, Sun, MonitorSmartphone, Bell, FileJson, FileSpreadsheet, Cloud, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ import { exportCSV, exportJSON, parseImportFile } from "@/lib/export-import";
 import { notificationPermission, notificationsSupported, requestNotificationPermission } from "@/lib/notifications";
 import type { Group } from "@/lib/timetable";
 import { cn } from "@/lib/utils";
+import { supabase, supabaseConfigured } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 const TITLE = "Settings — Harshit Kansal's Attendance";
 const DESC = "Set your name, section, classroom, group, attendance target, theme, reminders and manage backups.";
@@ -38,6 +40,46 @@ function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [confirm, setConfirm] = useState<"timetable" | "attendance" | null>(null);
   const [permDenied, setPermDenied] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authMessage, setAuthMessage] = useState("");
+
+  useEffect(() => {
+    if (!supabase) return;
+    void supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  const submitAuth = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!supabase) return;
+    setAuthBusy(true);
+    setAuthMessage("");
+    const result = authMode === "sign-in"
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
+    setAuthBusy(false);
+    if (result.error) {
+      setAuthMessage(result.error.message);
+      return;
+    }
+    if (authMode === "sign-up" && !result.data.session) {
+      setAuthMessage("Account created. Check your email to confirm it, then sign in.");
+    } else {
+      setPassword("");
+      setAuthMessage("Signed in. Your attendance data is syncing to your account.");
+    }
+  };
+
+  const signOut = async () => {
+    if (!supabase) return;
+    const { error } = await supabase.auth.signOut();
+    setAuthMessage(error?.message ?? "Signed out. This device keeps its local copy.");
+  };
 
   useEffect(() => {
     setPermDenied(notificationPermission() === "denied");
@@ -182,10 +224,34 @@ function SettingsPage() {
         </div>
       </Section>
 
+      <Section title="Cloud backup">
+        {!supabaseConfigured ? (
+          <>
+            <div className="flex items-center gap-3"><Cloud className="size-5 text-primary" /><p className="text-sm font-bold">Supabase is not connected yet</p></div>
+            <p className="text-xs text-muted-foreground">Add your project URL and anon key to the local environment, then restart the app. Your data stays on this device until you sign in.</p>
+          </>
+        ) : user ? (
+          <>
+            <div className="flex items-center gap-3"><Cloud className="size-5 text-primary" /><div className="min-w-0 flex-1"><p className="text-sm font-bold">Cloud backup is on</p><p className="truncate text-xs text-muted-foreground">{user.email}</p></div></div>
+            <p className="text-xs text-muted-foreground">Changes sync automatically. Your account data loads on other devices when you sign in.</p>
+            <ActionButton icon={LogOut} label="Sign out" onClick={() => void signOut()} wide />
+          </>
+        ) : (
+          <>
+            <p className="text-xs text-muted-foreground">Sign in to back up this device and sync your timetable, attendance, and calendar across devices.</p>
+            <form className="space-y-3" onSubmit={(e) => void submitAuth(e)}>
+              <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 text-base" /></Field>
+              <Field label="Password"><Input type="password" autoComplete={authMode === "sign-in" ? "current-password" : "new-password"} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 text-base" /></Field>
+              <button type="submit" disabled={authBusy} className="h-12 w-full rounded-2xl bg-primary font-extrabold text-primary-foreground disabled:opacity-60">{authBusy ? "Please wait…" : authMode === "sign-in" ? "Sign in and sync" : "Create account"}</button>
+            </form>
+            <button type="button" className="text-left text-xs font-bold text-primary" onClick={() => { setAuthMode(authMode === "sign-in" ? "sign-up" : "sign-in"); setAuthMessage(""); }}>{authMode === "sign-in" ? "New here? Create an account" : "Already have an account? Sign in"}</button>
+          </>
+        )}
+        {authMessage && <p role="status" className="text-xs text-muted-foreground">{authMessage}</p>}
+      </Section>
+
       <Section title="Backup & data">
-        <p className="text-xs text-muted-foreground">
-          Everything is stored on this device only · {records.length} attendance records
-        </p>
+        <p className="text-xs text-muted-foreground">Local copy on this device · {records.length} attendance records</p>
         <div className="grid grid-cols-2 gap-2">
           <ActionButton icon={FileJson} label="Export JSON" onClick={exportJSON} />
           <ActionButton icon={FileSpreadsheet} label="Export CSV" onClick={exportCSV} />
@@ -238,7 +304,7 @@ function SettingsPage() {
       </Section>
 
       <p className="mt-8 text-center text-[11px] text-muted-foreground">
-        Harshit Kansal's Attendance · NIT Hamirpur · Offline, private, no account
+        Harshit Kansal's Attendance · NIT Hamirpur · Offline-ready, private cloud sync
       </p>
     </main>
   );

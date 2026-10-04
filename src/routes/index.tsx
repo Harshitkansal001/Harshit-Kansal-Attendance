@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, Clock3, FileText, GraduationCap, RefreshCw, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, FileText, GraduationCap, RefreshCw, Sparkles, Sun, Umbrella } from "lucide-react";
+import { AcademicSheet, type SheetKind } from "@/components/AcademicSheet";
 import { ClassCard } from "@/components/ClassCard";
 import { findRecord, useAppState } from "@/lib/store";
 import { computeStreak, overall, subjectStats } from "@/lib/stats";
@@ -16,6 +18,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const state = useAppState();
+  const [activeSheet, setActiveSheet] = useState<SheetKind | null>(null);
   const now = useISTNow();
   const { settings, timetable, records, academic } = state;
   const today = now?.date ?? "";
@@ -39,8 +42,8 @@ function Home() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-muted-foreground">{now ? formatLongDate(today) : "Loading…"}</p>
-              <h2 className="hero-title mt-1">Good {now && now.hour < 12 ? "Morning" : now && now.hour < 17 ? "Afternoon" : "Evening"}, Harshit! 👋</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Here&apos;s your class schedule and attendance at a glance.</p>
+              <h2 className="hero-title mt-1">Good {now && now.hour < 12 ? "morning" : now && now.hour < 17 ? "afternoon" : "evening"}, Harshit.</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Your semester, at a glance.</p>
             </div>
             <div className="rounded-2xl border border-border bg-card px-4 py-3 text-right">
               <p className="text-[10px] font-bold uppercase tracking-[.18em] text-muted-foreground">India Standard Time</p>
@@ -48,10 +51,10 @@ function Home() {
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">OVERALL ATTENDANCE</p><p className="stat-number mt-2">{ov.pct == null ? "—" : `${ov.pct.toFixed(1)}%`}</p><p className="mt-1 text-xs text-muted-foreground">{ov.present}/{ov.total || 0} classes</p></div>
-            <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">CURRENT STREAK</p><p className="stat-number mt-2">{streak}</p><p className="mt-1 text-xs text-muted-foreground">{streak === 1 ? "day" : "days"} without an absence</p></div>
-            <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">TARGET</p><p className="stat-number mt-2">{settings.target}%</p><p className="mt-1 text-xs text-muted-foreground">Minimum attendance goal</p></div>
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="stat-panel stat-panel-lead"><p className="text-xs font-bold text-muted-foreground">OVERALL ATTENDANCE</p><p className="stat-number mt-2">{ov.pct == null ? "—" : `${ov.pct.toFixed(1)}%`}</p><p className="mt-1 text-xs text-muted-foreground">{ov.present}/{ov.total || 0} classes attended</p><div className="attendance-meter" aria-label={`${ov.pct?.toFixed(1) ?? 0}% attendance`}><span style={{ width: `${Math.min(100, ov.pct ?? 0)}%` }} /></div></div>
+            <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">PRESENT STREAK</p><p className="stat-number mt-2">{streak}<span className="stat-unit">d</span></p><p className="mt-1 text-xs text-muted-foreground">{streak === 1 ? "class day" : "class days"} without an absence</p></div>
+            <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">YOUR TARGET</p><p className="stat-number mt-2">{settings.target}<span className="stat-unit">%</span></p><p className="mt-1 text-xs text-muted-foreground">Minimum attendance goal</p></div>
           </div>
 
           <div className="mt-7 surface-card p-4 sm:p-5">
@@ -81,8 +84,9 @@ function Home() {
             <div className="flex items-center gap-2"><Sparkles className="size-5 text-primary" /><h3 className="section-title">Quick Actions</h3></div>
             <div className="mt-4 space-y-2.5">
               <Link to="/attendance" className="quick-action"><GraduationCap className="size-5" /> View Attendance</Link>
-              <Link to="/timetable" className="quick-action"><RefreshCw className="size-5" /> Reschedule / Manage</Link>
-              <Link to="/attendance" className="quick-action"><Clock3 className="size-5" /> Leave / Holiday</Link>
+              <button type="button" onClick={() => setActiveSheet("reschedule")} className="quick-action text-left"><RefreshCw className="size-5 shrink-0" /> Reschedule a class</button>
+              <button type="button" onClick={() => setActiveSheet("leave")} className="quick-action text-left"><Umbrella className="size-5 shrink-0" /> Add leave</button>
+              <button type="button" onClick={() => setActiveSheet("holiday")} className="quick-action text-left"><Sun className="size-5 shrink-0" /> Mark a holiday</button>
               <Link to="/settings" className="quick-action"><FileText className="size-5" /> Export / Settings</Link>
             </div>
           </div>
@@ -94,9 +98,10 @@ function Home() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card px-5 py-4"><p className="text-center text-xs font-bold text-muted-foreground">Discipline today = Freedom tomorrow ✨</p></div>
+          <div className="semester-note"><span>KEEP YOUR MOMENTUM</span><p>Every class counts toward the semester you want.</p></div>
         </aside>
       </div>
+      {activeSheet && <AcademicSheet kind={activeSheet} date={today} onClose={() => setActiveSheet(null)} />}
     </div>
   );
 }

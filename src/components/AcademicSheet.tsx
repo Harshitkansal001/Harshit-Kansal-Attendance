@@ -20,6 +20,7 @@ import { fmtTime, SUBJECT_NAMES } from "@/lib/timetable";
 
 export type SheetKind = "holiday" | "leave" | "cancel" | "reschedule" | "exam" | "event";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const SHEET_TITLES: Record<SheetKind, string> = {
   holiday: "🎉 Mark holiday",
   leave: "🏖️ Add leave",
@@ -34,7 +35,9 @@ export const SHEET_TITLES: Record<SheetKind, string> = {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="mb-1 block text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -43,9 +46,21 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 const inputCls =
   "w-full rounded-2xl border border-border bg-card px-4 py-3 text-base font-semibold outline-none focus:ring-2 focus:ring-primary";
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+function Sheet({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
       <button type="button" aria-label="Close" className="absolute inset-0" onClick={onClose} />
       <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-background p-4 pb-8 safe-bottom">
         <div className="mb-3 flex items-center justify-between">
@@ -65,7 +80,15 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-function Actions({ onClose, onDelete, saveLabel = "Save" }: { onClose: () => void; onDelete?: (() => void) | undefined; saveLabel?: string }) {
+function Actions({
+  onClose,
+  onDelete,
+  saveLabel = "Save",
+}: {
+  onClose: () => void;
+  onDelete?: (() => void) | undefined;
+  saveLabel?: string;
+}) {
   return (
     <div className="mt-5 flex gap-2">
       {onDelete && (
@@ -77,10 +100,17 @@ function Actions({ onClose, onDelete, saveLabel = "Save" }: { onClose: () => voi
           Delete
         </button>
       )}
-      <button type="button" onClick={onClose} className="tap-lg flex-1 rounded-2xl bg-muted text-base font-bold">
+      <button
+        type="button"
+        onClick={onClose}
+        className="tap-lg flex-1 rounded-2xl bg-muted text-base font-bold"
+      >
         Cancel
       </button>
-      <button type="submit" className="tap-lg flex-[2] rounded-2xl bg-primary text-base font-extrabold text-primary-foreground shadow-fab">
+      <button
+        type="submit"
+        className="tap-lg flex-2 rounded-2xl bg-primary text-base font-extrabold text-primary-foreground shadow-fab"
+      >
         {saveLabel}
       </button>
     </div>
@@ -233,14 +263,40 @@ function HolidayForm({
       }}
     >
       <div className="grid grid-cols-2 gap-3">
-        <Field label="From"><input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
-        <Field label="To"><input type="date" className={inputCls} value={to} onChange={(e) => setTo(e.target.value)} /></Field>
+        <Field label="From">
+          <input
+            type="date"
+            className={inputCls}
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+        </Field>
+        <Field label="To">
+          <input
+            type="date"
+            className={inputCls}
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+        </Field>
       </div>
       <Field label="Holiday name">
-        <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Diwali / Institute Holiday" list="holiday-presets" />
+        <input
+          className={inputCls}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Diwali / Institute Holiday"
+          list="holiday-presets"
+        />
       </Field>
       <datalist id="holiday-presets">
-        {["Independence Day", "Diwali", "Institute Holiday", "Unexpected Holiday", "Weather / Local Holiday"].map((h) => (
+        {[
+          "Independence Day",
+          "Diwali",
+          "Institute Holiday",
+          "Unexpected Holiday",
+          "Weather / Local Holiday",
+        ].map((h) => (
           <option key={h} value={h} />
         ))}
       </datalist>
@@ -320,22 +376,46 @@ function LeaveForm({
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={cn("h-11 rounded-full text-sm font-bold", mode === m ? "bg-card shadow-card" : "text-muted-foreground")}
+            className={cn(
+              "h-11 rounded-full text-sm font-bold",
+              mode === m ? "bg-card shadow-card" : "text-muted-foreground",
+            )}
           >
             {m === "day" ? "Full day / range" : "Single class"}
           </button>
         ))}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="From"><input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
+        <Field label="From">
+          <input
+            type="date"
+            className={inputCls}
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+        </Field>
         {mode === "day" ? (
-          <Field label="To"><input type="date" className={inputCls} value={to} onChange={(e) => setTo(e.target.value)} /></Field>
+          <Field label="To">
+            <input
+              type="date"
+              className={inputCls}
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </Field>
         ) : (
-          <Field label="Class"><SlotPicker value={slotId} onChange={setSlotId} occs={occs} /></Field>
+          <Field label="Class">
+            <SlotPicker value={slotId} onChange={setSlotId} occs={occs} />
+          </Field>
         )}
       </div>
       <Field label="Reason">
-        <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Medical / Personal / Planned" />
+        <input
+          className={inputCls}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Medical / Personal / Planned"
+        />
       </Field>
       <Field label="Notes (optional)">
         <input className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} />
@@ -388,20 +468,39 @@ function CancelForm({
         });
       }}
     >
-      <Field label="Date"><input type="date" className={inputCls} value={d} onChange={(e) => { setD(e.target.value); setSlotId(""); }} /></Field>
-      <Field label="Class"><SlotPicker value={slotId} onChange={setSlotId} occs={occs} /></Field>
+      <Field label="Date">
+        <input
+          type="date"
+          className={inputCls}
+          value={d}
+          onChange={(e) => {
+            setD(e.target.value);
+            setSlotId("");
+          }}
+        />
+      </Field>
+      <Field label="Class">
+        <SlotPicker value={slotId} onChange={setSlotId} occs={occs} />
+      </Field>
       {picked && (
         <p className="rounded-2xl bg-muted p-3 text-sm font-semibold">
           {picked.code} · {picked.teacher} · {fmtTime(picked.start)}–{fmtTime(picked.end)}
         </p>
       )}
       <Field label="Reason">
-        <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Faculty unavailable" />
+        <input
+          className={inputCls}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Faculty unavailable"
+        />
       </Field>
       <Field label="Notes (optional)">
         <input className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
-      <p className="text-xs text-muted-foreground">Only this class is cancelled — the rest of the day is unaffected.</p>
+      <p className="text-xs text-muted-foreground">
+        Only this class is cancelled — the rest of the day is unaffected.
+      </p>
       <Actions onClose={onClose} onDelete={onDelete} saveLabel="Cancel class" />
     </form>
   );
@@ -455,15 +554,52 @@ function RescheduleForm({
         });
       }}
     >
-      <Field label="Original date"><input type="date" className={inputCls} value={fromDate} onChange={(e) => { setFromDate(e.target.value); setSlotId(""); }} /></Field>
-      <Field label="Original class"><SlotPicker value={slotId} onChange={setSlotId} occs={occs} /></Field>
-      <Field label="New date"><input type="date" className={inputCls} value={toDate} onChange={(e) => setToDate(e.target.value)} /></Field>
+      <Field label="Original date">
+        <input
+          type="date"
+          className={inputCls}
+          value={fromDate}
+          onChange={(e) => {
+            setFromDate(e.target.value);
+            setSlotId("");
+          }}
+        />
+      </Field>
+      <Field label="Original class">
+        <SlotPicker value={slotId} onChange={setSlotId} occs={occs} />
+      </Field>
+      <Field label="New date">
+        <input
+          type="date"
+          className={inputCls}
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+        />
+      </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="New start"><input type="time" className={inputCls} value={start} onChange={(e) => setStart(e.target.value)} /></Field>
-        <Field label="New end"><input type="time" className={inputCls} value={end} onChange={(e) => setEnd(e.target.value)} /></Field>
+        <Field label="New start">
+          <input
+            type="time"
+            className={inputCls}
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+          />
+        </Field>
+        <Field label="New end">
+          <input
+            type="time"
+            className={inputCls}
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+          />
+        </Field>
       </div>
-      <Field label="Room (optional)"><input className={inputCls} value={room} onChange={(e) => setRoom(e.target.value)} /></Field>
-      <Field label="Reason (optional)"><input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
+      <Field label="Room (optional)">
+        <input className={inputCls} value={room} onChange={(e) => setRoom(e.target.value)} />
+      </Field>
+      <Field label="Reason (optional)">
+        <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} />
+      </Field>
       <Actions onClose={onClose} onDelete={onDelete} />
     </form>
   );
@@ -513,27 +649,72 @@ function ExamForm({
       }}
     >
       <Field label="Exam type">
-        <select className={inputCls} value={type} onChange={(e) => setType(e.target.value as Exam["type"])}>
-          {EXAM_TYPES.map((t) => <option key={t}>{t}</option>)}
+        <select
+          className={inputCls}
+          value={type}
+          onChange={(e) => setType(e.target.value as Exam["type"])}
+        >
+          {EXAM_TYPES.map((t) => (
+            <option key={t}>{t}</option>
+          ))}
         </select>
       </Field>
-      <Field label="Exam name"><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder={type} /></Field>
+      <Field label="Exam name">
+        <input
+          className={inputCls}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={type}
+        />
+      </Field>
       <Field label="Subject">
         <select className={inputCls} value={code} onChange={(e) => setCode(e.target.value)}>
-          {SUBJECT_CODES.map((c) => <option key={c} value={c}>{c} · {SUBJECT_NAMES[c]}</option>)}
+          {SUBJECT_CODES.map((c) => (
+            <option key={c} value={c}>
+              {c} · {SUBJECT_NAMES[c]}
+            </option>
+          ))}
         </select>
       </Field>
-      <Field label="Date"><input type="date" className={inputCls} value={d} onChange={(e) => setD(e.target.value)} /></Field>
+      <Field label="Date">
+        <input type="date" className={inputCls} value={d} onChange={(e) => setD(e.target.value)} />
+      </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Start"><input type="time" className={inputCls} value={start} onChange={(e) => setStart(e.target.value)} /></Field>
-        <Field label="End"><input type="time" className={inputCls} value={end} onChange={(e) => setEnd(e.target.value)} /></Field>
+        <Field label="Start">
+          <input
+            type="time"
+            className={inputCls}
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+          />
+        </Field>
+        <Field label="End">
+          <input
+            type="time"
+            className={inputCls}
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+          />
+        </Field>
       </div>
-      <Field label="Room"><input className={inputCls} value={room} onChange={(e) => setRoom(e.target.value)} /></Field>
-      <Field label="Syllabus / notes (optional)"><textarea className={inputCls} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
+      <Field label="Room">
+        <input className={inputCls} value={room} onChange={(e) => setRoom(e.target.value)} />
+      </Field>
+      <Field label="Syllabus / notes (optional)">
+        <textarea
+          className={inputCls}
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </Field>
       <button
         type="button"
         onClick={() => setCompleted((c) => !c)}
-        className={cn("tap-lg w-full rounded-2xl text-sm font-bold", completed ? "bg-success-soft text-success" : "bg-muted text-muted-foreground")}
+        className={cn(
+          "tap-lg w-full rounded-2xl text-sm font-bold",
+          completed ? "bg-success-soft text-success" : "bg-muted text-muted-foreground",
+        )}
       >
         {completed ? "✅ Marked completed" : "Mark completed"}
       </button>
@@ -581,27 +762,79 @@ function EventForm({
         });
       }}
     >
-      <Field label="Event name"><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Assignment deadline" /></Field>
+      <Field label="Event name">
+        <input
+          className={inputCls}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Assignment deadline"
+        />
+      </Field>
       <Field label="Type">
-        <select className={inputCls} value={type} onChange={(e) => setType(e.target.value as AcademicEvent["type"])}>
-          {EVENT_TYPES.map((t) => <option key={t}>{t}</option>)}
+        <select
+          className={inputCls}
+          value={type}
+          onChange={(e) => setType(e.target.value as AcademicEvent["type"])}
+        >
+          {EVENT_TYPES.map((t) => (
+            <option key={t}>{t}</option>
+          ))}
         </select>
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="From"><input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
-        <Field label="To"><input type="date" className={inputCls} value={to} onChange={(e) => setTo(e.target.value)} /></Field>
+        <Field label="From">
+          <input
+            type="date"
+            className={inputCls}
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+        </Field>
+        <Field label="To">
+          <input
+            type="date"
+            className={inputCls}
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+        </Field>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Start (optional)"><input type="time" className={inputCls} value={start} onChange={(e) => setStart(e.target.value)} /></Field>
-        <Field label="End (optional)"><input type="time" className={inputCls} value={end} onChange={(e) => setEnd(e.target.value)} /></Field>
+        <Field label="Start (optional)">
+          <input
+            type="time"
+            className={inputCls}
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+          />
+        </Field>
+        <Field label="End (optional)">
+          <input
+            type="time"
+            className={inputCls}
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+          />
+        </Field>
       </div>
       <Field label="Subject (optional)">
         <select className={inputCls} value={code} onChange={(e) => setCode(e.target.value)}>
           <option value="">None</option>
-          {SUBJECT_CODES.map((c) => <option key={c} value={c}>{c}</option>)}
+          {SUBJECT_CODES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
       </Field>
-      <Field label="Description (optional)"><textarea className={inputCls} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} /></Field>
+      <Field label="Description (optional)">
+        <textarea
+          className={inputCls}
+          rows={2}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </Field>
       <Actions onClose={onClose} onDelete={onDelete} />
     </form>
   );

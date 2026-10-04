@@ -8,7 +8,7 @@ function isBlockedContext(): boolean {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return true;
   if (!import.meta.env.PROD) return true;
   if (window.self !== window.top) return true;
-  if (h.startsWith("id-preview--") || h.startsWith("preview--")) return true;
+  if (window.location.hostname.startsWith("id-preview--") || window.location.hostname.startsWith("preview--")) return true;
   if (new URLSearchParams(window.location.search).get("sw") === "off") return true;
   return false;
 }

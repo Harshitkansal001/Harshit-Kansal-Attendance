@@ -147,6 +147,10 @@ export function useAppState(): AppState {
   return useSyncExternalStore(subscribe, getState, () => SERVER_STATE);
 }
 
+export function subscribeAppState(listener: () => void) {
+  return subscribe(listener);
+}
+
 export function useHydrated(): boolean {
   return useSyncExternalStore(
     () => () => {},
