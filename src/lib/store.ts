@@ -68,8 +68,14 @@ const freshSectionData = (section: string): SectionData => ({
 });
 
 export function defaultState(): AppState {
-  const sectionData = Object.fromEntries(FIRST_YEAR_SECTIONS.map((section) => [section, freshSectionData(section)]));
-  const active = sectionData[DEFAULT_SETTINGS.section] ?? { timetable: buildDefaultTimetable(), records: [], academic: freshAcademic() };
+  const sectionData = Object.fromEntries(
+    FIRST_YEAR_SECTIONS.map((section) => [section, freshSectionData(section)]),
+  );
+  const active = sectionData[DEFAULT_SETTINGS.section] ?? {
+    timetable: buildDefaultTimetable(),
+    records: [],
+    academic: freshAcademic(),
+  };
   return {
     version: 3,
     settings: { ...DEFAULT_SETTINGS, classroom: "F1" },
@@ -84,18 +90,20 @@ let state: AppState = SERVER_STATE;
 let loaded = false;
 const listeners = new Set<() => void>();
 
-function sanitizeAcademic(raw: unknown, seedEvents: boolean): Academic {
-  const a = emptyAcademic();
-  const r = (raw ?? {}) as Record<string, unknown>;
+function sanitizeAcademic(raw: unknown): Academic {
+  const academic = emptyAcademic();
+  const stored = (raw ?? {}) as Record<string, unknown>;
   for (const key of ACADEMIC_KEYS) {
-    const v = r[key];
-    if (Array.isArray(v)) {
+    const items = stored[key];
+    if (Array.isArray(items)) {
       // keep only object entries carrying an id
-      (a[key] as unknown[]) = v.filter((x) => !!x && typeof x === "object" && "id" in (x as object));
+      (academic[key] as unknown[]) = items.filter(
+        (item) => !!item && typeof item === "object" && "id" in item,
+      );
     }
   }
-  if (seedEvents && a.events.length === 0) a.events = defaultAcademicEvents();
-  return a;
+  if (academic.events.length === 0) academic.events = defaultAcademicEvents();
+  return academic;
 }
 
 export function sanitizeState(raw: unknown): AppState | null {
@@ -112,19 +120,24 @@ export function sanitizeState(raw: unknown): AppState | null {
       if (!value || typeof value !== "object") continue;
       const data = value as Partial<SectionData> & { academic?: unknown };
       sectionData[section] = {
-        timetable: Array.isArray(data.timetable) ? data.timetable as Slot[] : buildFirstYearTimetable(section),
-        records: Array.isArray(data.records) ? data.records as AttendanceRecord[] : [],
-        academic: sanitizeAcademic(data.academic, true),
+        timetable: Array.isArray(data.timetable)
+          ? (data.timetable as Slot[])
+          : buildFirstYearTimetable(section),
+        records: Array.isArray(data.records) ? (data.records as AttendanceRecord[]) : [],
+        academic: sanitizeAcademic(data.academic),
       };
     }
   }
   const activeData = sectionData[settings.section];
   const legacyTimetable = Array.isArray(r.timetable) && r.timetable.length ? r.timetable : null;
-  const timetable = legacyTimetable ?? activeData?.timetable ?? buildFirstYearTimetable(settings.section);
+  const timetable =
+    legacyTimetable ?? activeData?.timetable ?? buildFirstYearTimetable(settings.section);
   const records = Array.isArray(r.records)
-    ? r.records.filter((x): x is AttendanceRecord => !!x && typeof x === "object" && "date" in x && "slotId" in x)
-    : activeData?.records ?? [];
-  const academic = sanitizeAcademic(r.academic ?? activeData?.academic, true);
+    ? r.records.filter(
+        (x): x is AttendanceRecord => !!x && typeof x === "object" && "date" in x && "slotId" in x,
+      )
+    : (activeData?.records ?? []);
+  const academic = sanitizeAcademic(r.academic ?? activeData?.academic);
   sectionData[settings.section] = { timetable, records, academic };
   return { version: 3, settings, timetable, records, academic, sectionData };
 }
@@ -167,24 +180,24 @@ export function setState(updater: (s: AppState) => AppState) {
   const nextSection = proposed.settings.section;
   const sectionData = { ...proposed.sectionData };
   if (previousSection !== nextSection) {
-    sectionData[previousSection] = {
-      timetable: previous.timetable,
-      records: previous.records,
-      academic: previous.academic,
-    };
+    sectionData[previousSection] = sectionSnapshot(previous);
     const destination = sectionData[nextSection] ?? freshSectionData(nextSection);
     sectionData[nextSection] = destination;
     state = { ...proposed, ...destination, sectionData };
   } else {
-    sectionData[nextSection] = {
-      timetable: proposed.timetable,
-      records: proposed.records,
-      academic: proposed.academic,
-    };
+    sectionData[nextSection] = sectionSnapshot(proposed);
     state = { ...proposed, sectionData };
   }
   persist();
   listeners.forEach((l) => l());
+}
+
+function sectionSnapshot(state: AppState): SectionData {
+  return {
+    timetable: state.timetable,
+    records: state.records,
+    academic: state.academic,
+  };
 }
 
 function subscribe(l: () => void) {
@@ -267,7 +280,10 @@ export function markAttendance(input: MarkInput): () => void {
 export function clearRecord(date: string, slotId: string): () => void {
   const prev = findRecord(getState().records, date, slotId);
   const prevCopy = prev ? { ...prev } : null;
-  setState((s) => ({ ...s, records: s.records.filter((r) => !(r.date === date && r.slotId === slotId)) }));
+  setState((s) => ({
+    ...s,
+    records: s.records.filter((r) => !(r.date === date && r.slotId === slotId)),
+  }));
   return () => {
     if (!prevCopy) return;
     setState((s) => ({ ...s, records: [...s.records, prevCopy] }));
@@ -281,7 +297,12 @@ export function updateSettings(patch: Partial<Settings>) {
 export function upsertSlot(slot: Slot) {
   setState((s) => {
     const exists = s.timetable.some((x) => x.id === slot.id);
-    return { ...s, timetable: exists ? s.timetable.map((x) => (x.id === slot.id ? slot : x)) : [...s.timetable, slot] };
+    return {
+      ...s,
+      timetable: exists
+        ? s.timetable.map((x) => (x.id === slot.id ? slot : x))
+        : [...s.timetable, slot],
+    };
   });
 }
 
@@ -331,11 +352,17 @@ export function deleteAcademic<K extends AcademicKey>(key: K, id: string): () =>
   const prev = (getState().academic[key] as { id: string }[]).find((x) => x.id === id);
   setState((s) => ({
     ...s,
-    academic: { ...s.academic, [key]: (s.academic[key] as { id: string }[]).filter((x) => x.id !== id) },
+    academic: {
+      ...s.academic,
+      [key]: (s.academic[key] as { id: string }[]).filter((x) => x.id !== id),
+    },
   }));
   return () => {
     if (!prev) return;
-    setState((s) => ({ ...s, academic: { ...s.academic, [key]: [...(s.academic[key] as unknown[]), prev] } }));
+    setState((s) => ({
+      ...s,
+      academic: { ...s.academic, [key]: [...(s.academic[key] as unknown[]), prev] },
+    }));
   };
 }
 
