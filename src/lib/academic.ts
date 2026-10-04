@@ -298,16 +298,16 @@ export function scanCounts(
 }
 
 export const STATUS_ICON: Record<string, string> = {
-  class: "🟢",
-  present: "✅",
-  absent: "🔴",
-  leave: "🏖️",
-  holiday: "🎉",
-  cancelled: "❌",
-  moved: "🔄",
-  rescheduled: "🔄",
-  exam: "📝",
-  event: "📅",
+  class: "C",
+  present: "P",
+  absent: "A",
+  leave: "L",
+  holiday: "H",
+  cancelled: "C",
+  moved: "M",
+  rescheduled: "R",
+  exam: "E",
+  event: "E",
 };
 
 export function examStart(e: { date: string; start: string }): number {

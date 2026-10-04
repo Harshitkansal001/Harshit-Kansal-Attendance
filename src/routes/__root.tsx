@@ -17,7 +17,7 @@ import { useAppState } from "../lib/store";
 import { setupPWA } from "../lib/pwa";
 import { startNotificationScheduler } from "../lib/notifications";
 
-const THEME_SCRIPT = `(function(){try{var s=JSON.parse(localStorage.getItem("nit-self-attendance:v1")||"{}");var t=s.settings&&s.settings.theme||"system";var d=t==="dark"||(t==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
+const THEME_SCRIPT = `(function(){try{var s=JSON.parse(localStorage.getItem("nit-self-attendance:v1")||"{}");var t=s.settings&&s.settings.theme||"system";var d=t==="dark"||(t==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);document.documentElement.classList.toggle("light",!d);}catch(e){}})();`;
 
 function NotFoundComponent() {
   return (
@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "author", content: "Harshit Kansal" },
-      { name: "theme-color", content: "#07152d" },
+      { name: "theme-color", content: "#121212" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
@@ -97,12 +97,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap",
-      },
     ],
     scripts: [{ children: THEME_SCRIPT }],
   }),
@@ -133,6 +127,7 @@ function ThemeAndServices() {
     const apply = () => {
       const dark = theme === "dark" || (theme === "system" && mq.matches);
       document.documentElement.classList.toggle("dark", dark);
+      document.documentElement.classList.toggle("light", !dark);
     };
     apply();
     mq.addEventListener("change", apply);
@@ -153,6 +148,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeAndServices />
       <CloudSync />
+      <div className="grain-layer" aria-hidden="true" />
       <div className="app-shell">
         <aside className="desktop-sidebar">
           <Link to="/" className="brand-block">
@@ -172,7 +168,7 @@ function RootComponent() {
         </aside>
         <div className="app-main">
           <header className="topbar">
-            <div><p className="eyebrow">NIT HAMIRPUR · PERSONAL DASHBOARD</p><h1>Harshit Kansal's Attendance</h1><p>Track · Manage · Stay on Schedule</p></div>
+            <div><p className="eyebrow">NIT HAMIRPUR</p><h1>Attendance tracker</h1></div>
             <div className="topbar-user"><span className="profile-avatar small">HK</span><span>Harshit Kansal</span></div>
           </header>
           <main className="page-content"><Outlet /></main>

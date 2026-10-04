@@ -22,12 +22,12 @@ export type SheetKind = "holiday" | "leave" | "cancel" | "reschedule" | "exam" |
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const SHEET_TITLES: Record<SheetKind, string> = {
-  holiday: "🎉 Mark holiday",
-  leave: "🏖️ Add leave",
-  cancel: "❌ Cancel class",
-  reschedule: "🔄 Reschedule class",
-  exam: "📝 Add exam",
-  event: "📅 Add academic event",
+  holiday: "Mark holiday",
+  leave: "Add leave",
+  cancel: "Cancel class",
+  reschedule: "Reschedule class",
+  exam: "Add exam",
+  event: "Add academic event",
 };
 
 /* ---------- primitives ---------- */

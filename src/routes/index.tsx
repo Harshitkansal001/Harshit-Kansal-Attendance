@@ -51,7 +51,7 @@ function Home() {
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-7 dashboard-metrics grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="stat-panel stat-panel-lead"><p className="text-xs font-bold text-muted-foreground">OVERALL ATTENDANCE</p><p className="stat-number mt-2">{ov.pct == null ? "—" : `${ov.pct.toFixed(1)}%`}</p><p className="mt-1 text-xs text-muted-foreground">{ov.present}/{ov.total || 0} classes attended</p><div className="attendance-meter" aria-label={`${ov.pct?.toFixed(1) ?? 0}% attendance`}><span style={{ width: `${Math.min(100, ov.pct ?? 0)}%` }} /></div></div>
             <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">PRESENT STREAK</p><p className="stat-number mt-2">{streak}<span className="stat-unit">d</span></p><p className="mt-1 text-xs text-muted-foreground">{streak === 1 ? "class day" : "class days"} without an absence</p></div>
             <div className="stat-panel"><p className="text-xs font-bold text-muted-foreground">YOUR TARGET</p><p className="stat-number mt-2">{settings.target}<span className="stat-unit">%</span></p><p className="mt-1 text-xs text-muted-foreground">Minimum attendance goal</p></div>

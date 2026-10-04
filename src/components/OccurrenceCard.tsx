@@ -96,7 +96,7 @@ export function OccurrenceCard({
             )}
             {occ.origin === "reschedule" && (
               <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">
-                🔄 Rescheduled here
+                Rescheduled here
               </span>
             )}
           </div>
