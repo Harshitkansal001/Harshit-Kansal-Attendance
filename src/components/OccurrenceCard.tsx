@@ -31,7 +31,13 @@ export function OccurrenceCard({
   compact?: boolean;
 }) {
   const mark = (status: Status) => {
-    const undo = markAttendance({ date, slotId: occ.key, code: occ.code, teacher: occ.teacher, status });
+    const undo = markAttendance({
+      date,
+      slotId: occ.key,
+      code: occ.code,
+      teacher: occ.teacher,
+      status,
+    });
     toast(status === "present" ? `Marked present · ${occ.code}` : `Marked absent · ${occ.code}`, {
       action: { label: "Undo", onClick: undo },
     });
@@ -56,12 +62,21 @@ export function OccurrenceCard({
     >
       <div className={cn("flex items-start gap-3 p-4", compact && "p-3")}>
         <div className="flex w-14 shrink-0 flex-col items-center rounded-2xl bg-secondary py-2 text-secondary-foreground">
-          <span className="text-sm font-extrabold tabular">{fmtTime(occ.start).replace(/ (AM|PM)/, "")}</span>
-          <span className="text-[10px] font-semibold uppercase opacity-70">{fmtTime(occ.start).slice(-2)}</span>
+          <span className="text-sm font-extrabold tabular">
+            {fmtTime(occ.start).replace(/ (AM|PM)/, "")}
+          </span>
+          <span className="text-[10px] font-semibold uppercase opacity-70">
+            {fmtTime(occ.start).slice(-2)}
+          </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className={cn("truncate text-lg font-extrabold leading-tight", blocked && "line-through opacity-70")}>
+            <h3
+              className={cn(
+                "truncate text-lg font-extrabold leading-tight",
+                blocked && "line-through opacity-70",
+              )}
+            >
               {occ.code}
             </h3>
             {occ.label && (
@@ -92,8 +107,12 @@ export function OccurrenceCard({
           </p>
           <p className="mt-1 text-xs font-semibold tabular text-muted-foreground">
             {fmtTime(occ.start)} – {fmtTime(occ.end)}
-            {phase === "live" && countdown && <span className="ml-2 text-primary">ends in {countdown}</span>}
-            {phase === "upcoming" && countdown && <span className="ml-2 text-primary">starts in {countdown}</span>}
+            {phase === "live" && countdown && (
+              <span className="ml-2 text-primary">ends in {countdown}</span>
+            )}
+            {phase === "upcoming" && countdown && (
+              <span className="ml-2 text-primary">starts in {countdown}</span>
+            )}
           </p>
           {occ.movedTo && (
             <p className="mt-1 text-xs font-semibold text-accent-foreground">
@@ -130,7 +149,11 @@ export function OccurrenceCard({
                 onClick={() => mark(record.status === "present" ? "absent" : "present")}
                 className="tap-lg flex flex-1 items-center justify-center gap-2 rounded-2xl bg-secondary text-sm font-bold text-secondary-foreground active:scale-[0.98]"
               >
-                {record.status === "present" ? <X className="size-4" /> : <Check className="size-4" />}
+                {record.status === "present" ? (
+                  <X className="size-4" />
+                ) : (
+                  <Check className="size-4" />
+                )}
                 Change to {record.status === "present" ? "Absent" : "Present"}
               </button>
               <button
