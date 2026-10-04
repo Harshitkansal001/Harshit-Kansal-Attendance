@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { buildDefaultTimetable, type Group, type Slot } from "./timetable";
+import { buildFirstYearTimetable, FIRST_YEAR_SECTIONS } from "./first-year";
 import {
   ACADEMIC_KEYS,
   defaultAcademicEvents,
@@ -32,12 +33,19 @@ export interface Settings {
   notifications: boolean;
 }
 
+export interface SectionData {
+  timetable: Slot[];
+  records: AttendanceRecord[];
+  academic: Academic;
+}
+
 export interface AppState {
   version: number;
   settings: Settings;
   timetable: Slot[];
   records: AttendanceRecord[];
   academic: Academic;
+  sectionData: Record<string, SectionData>;
 }
 
 export const STORAGE_KEY = "nit-self-attendance:v1";
@@ -52,13 +60,21 @@ export const DEFAULT_SETTINGS: Settings = {
   notifications: false,
 };
 
+const freshAcademic = (): Academic => ({ ...emptyAcademic(), events: defaultAcademicEvents() });
+const freshSectionData = (section: string): SectionData => ({
+  timetable: buildFirstYearTimetable(section),
+  records: [],
+  academic: freshAcademic(),
+});
+
 export function defaultState(): AppState {
+  const sectionData = Object.fromEntries(FIRST_YEAR_SECTIONS.map((section) => [section, freshSectionData(section)]));
+  const active = sectionData[DEFAULT_SETTINGS.section] ?? { timetable: buildDefaultTimetable(), records: [], academic: freshAcademic() };
   return {
-    version: 2,
-    settings: { ...DEFAULT_SETTINGS },
-    timetable: buildDefaultTimetable(),
-    records: [],
-    academic: { ...emptyAcademic(), events: defaultAcademicEvents() },
+    version: 3,
+    settings: { ...DEFAULT_SETTINGS, classroom: "F1" },
+    ...active,
+    sectionData,
   };
 }
 
@@ -84,18 +100,33 @@ function sanitizeAcademic(raw: unknown, seedEvents: boolean): Academic {
 
 export function sanitizeState(raw: unknown): AppState | null {
   if (!raw || typeof raw !== "object") return null;
-  const r = raw as Partial<AppState> & { academic?: unknown };
+  const r = raw as Partial<AppState> & { academic?: unknown; sectionData?: unknown };
   const base = defaultState();
   const settings = { ...base.settings, ...(r.settings ?? {}) };
   settings.group = ([1, 2, 3] as const).includes(settings.group) ? settings.group : 1;
+  settings.section = String(settings.section || DEFAULT_SETTINGS.section).toUpperCase();
   settings.target = Math.min(100, Math.max(1, Number(settings.target) || 75));
-  const timetable = Array.isArray(r.timetable) && r.timetable.length ? r.timetable : base.timetable;
+  const sectionData: Record<string, SectionData> = { ...base.sectionData };
+  if (r.sectionData && typeof r.sectionData === "object") {
+    for (const [section, value] of Object.entries(r.sectionData as Record<string, unknown>)) {
+      if (!value || typeof value !== "object") continue;
+      const data = value as Partial<SectionData> & { academic?: unknown };
+      sectionData[section] = {
+        timetable: Array.isArray(data.timetable) ? data.timetable as Slot[] : buildFirstYearTimetable(section),
+        records: Array.isArray(data.records) ? data.records as AttendanceRecord[] : [],
+        academic: sanitizeAcademic(data.academic, true),
+      };
+    }
+  }
+  const activeData = sectionData[settings.section];
+  const legacyTimetable = Array.isArray(r.timetable) && r.timetable.length ? r.timetable : null;
+  const timetable = legacyTimetable ?? activeData?.timetable ?? buildFirstYearTimetable(settings.section);
   const records = Array.isArray(r.records)
     ? r.records.filter((x): x is AttendanceRecord => !!x && typeof x === "object" && "date" in x && "slotId" in x)
-    : [];
-  // Migration: v1 payloads have no `academic` block — seed the editable academic calendar.
-  const academic = sanitizeAcademic(r.academic, true);
-  return { version: 2, settings, timetable, records, academic };
+    : activeData?.records ?? [];
+  const academic = sanitizeAcademic(r.academic ?? activeData?.academic, true);
+  sectionData[settings.section] = { timetable, records, academic };
+  return { version: 3, settings, timetable, records, academic, sectionData };
 }
 
 function load() {
@@ -130,7 +161,28 @@ export function getState(): AppState {
 
 export function setState(updater: (s: AppState) => AppState) {
   load();
-  state = updater(state);
+  const previous = state;
+  const proposed = updater(previous);
+  const previousSection = previous.settings.section;
+  const nextSection = proposed.settings.section;
+  const sectionData = { ...proposed.sectionData };
+  if (previousSection !== nextSection) {
+    sectionData[previousSection] = {
+      timetable: previous.timetable,
+      records: previous.records,
+      academic: previous.academic,
+    };
+    const destination = sectionData[nextSection] ?? freshSectionData(nextSection);
+    sectionData[nextSection] = destination;
+    state = { ...proposed, ...destination, sectionData };
+  } else {
+    sectionData[nextSection] = {
+      timetable: proposed.timetable,
+      records: proposed.records,
+      academic: proposed.academic,
+    };
+    state = { ...proposed, sectionData };
+  }
   persist();
   listeners.forEach((l) => l());
 }
@@ -238,7 +290,7 @@ export function deleteSlot(slotId: string) {
 }
 
 export function resetTimetable() {
-  setState((s) => ({ ...s, timetable: buildDefaultTimetable() }));
+  setState((s) => ({ ...s, timetable: buildFirstYearTimetable(s.settings.section) }));
 }
 
 export function clearAllAttendance() {
@@ -246,7 +298,10 @@ export function clearAllAttendance() {
 }
 
 export function replaceState(next: AppState) {
-  setState(() => next);
+  load();
+  state = sanitizeState(next) ?? defaultState();
+  persist();
+  listeners.forEach((l) => l());
 }
 
 export function mergeRecords(incoming: AttendanceRecord[]) {

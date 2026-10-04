@@ -16,6 +16,7 @@ import {
 import { exportCSV, exportJSON, parseImportFile } from "@/lib/export-import";
 import { notificationPermission, notificationsSupported, requestNotificationPermission } from "@/lib/notifications";
 import type { Group } from "@/lib/timetable";
+import { FIRST_YEAR_SECTIONS, SECTION_CLASSROOMS } from "@/lib/first-year";
 import { cn } from "@/lib/utils";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -127,7 +128,18 @@ function SettingsPage() {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Section">
-            <Input value={settings.section} onChange={(e) => updateSettings({ section: e.target.value })} className="h-12 text-base" />
+            <select
+            value={settings.section}
+            onChange={(e) => {
+              const section = e.target.value as (typeof FIRST_YEAR_SECTIONS)[number];
+              updateSettings({ section, classroom: SECTION_CLASSROOMS[section] });
+            }}
+            className="h-12 w-full rounded-md border border-input bg-background px-3 text-base text-foreground outline-none"
+          >
+            {FIRST_YEAR_SECTIONS.map((section) => (
+              <option key={section} value={section}>Section {section}</option>
+            ))}
+          </select>
           </Field>
           <Field label="Classroom">
             <Input value={settings.classroom} onChange={(e) => updateSettings({ classroom: e.target.value })} className="h-12 text-base" />
@@ -275,7 +287,7 @@ function SettingsPage() {
         {confirm ? (
           <div className="rounded-2xl bg-danger-soft p-4">
             <p className="text-sm font-bold text-destructive">
-              {confirm === "timetable" ? "Reset timetable to the Section D default?" : "Delete all attendance records?"}
+              {confirm === "timetable" ? `Reset the Section ${settings.section} timetable to the PDF schedule?` : "Delete all attendance records for this section?"}
             </p>
             <div className="mt-3 flex gap-2">
               <button
