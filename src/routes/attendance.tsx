@@ -8,7 +8,7 @@ import { addDays, formatShortDate, formatTimestamp, useISTNow, weekdayOf } from 
 import { resolveSlot, slotsForDay, DAY_NAMES } from "@/lib/timetable";
 import { cn } from "@/lib/utils";
 
-const TITLE = "Attendance — Harshit Kansal's Attendance";
+const TITLE = "Attendance — Attendance Tracker";
 const DESC = "Subject-wise attendance totals, percentages, 75% target warnings, streak and monthly summary.";
 
 export const Route = createFileRoute("/attendance")({

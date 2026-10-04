@@ -8,8 +8,8 @@ import { computeStreak, overall, subjectStats } from "@/lib/stats";
 import { formatClock, formatLongDate, useISTNow } from "@/lib/time";
 import { resolveSlot, slotsForDay, toMinutes } from "@/lib/timetable";
 
-const TITLE = "Harshit Kansal's Attendance";
-const DESC = "Personal NIT Hamirpur attendance dashboard for Harshit Kansal.";
+const TITLE = "Attendance Tracker — NIT Hamirpur";
+const DESC = "NIT Hamirpur student attendance dashboard.";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: TITLE }, { name: "description", content: DESC }] }),
@@ -42,7 +42,7 @@ function Home() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-muted-foreground">{now ? formatLongDate(today) : "Loading…"}</p>
-              <h2 className="hero-title mt-1">Good {now && now.hour < 12 ? "morning" : now && now.hour < 17 ? "afternoon" : "evening"}, Harshit.</h2>
+              <h2 className="hero-title mt-1">Good {now && now.hour < 12 ? "morning" : now && now.hour < 17 ? "afternoon" : "evening"}, {settings.name.trim().split(/\s+/)[0] || "User"}.</h2>
               <p className="mt-2 text-sm text-muted-foreground">Your semester, at a glance.</p>
             </div>
             <div className="rounded-2xl border border-border bg-card px-4 py-3 text-right">

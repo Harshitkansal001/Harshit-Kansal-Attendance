@@ -22,7 +22,7 @@ import {
 } from "@/lib/timetable";
 import { cn } from "@/lib/utils";
 
-const TITLE = "Timetable — Harshit Kansal's Attendance";
+const TITLE = "Timetable — Attendance Tracker";
 const DESC = "Daily and weekly class schedule for Section D, Classroom F1. Edit slots and group classes.";
 
 export const Route = createFileRoute("/timetable")({

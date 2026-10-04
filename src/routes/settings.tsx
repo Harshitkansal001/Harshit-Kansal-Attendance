@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 
-const TITLE = "Settings — Harshit Kansal's Attendance";
+const TITLE = "Settings — Attendance Tracker";
 const DESC = "Set your name, section, classroom, group, attendance target, theme, reminders and manage backups.";
 
 export const Route = createFileRoute("/settings")({
@@ -316,7 +316,7 @@ function SettingsPage() {
       </Section>
 
       <p className="mt-8 text-center text-[11px] text-muted-foreground">
-        Harshit Kansal's Attendance · NIT Hamirpur · Offline-ready, private cloud sync
+        NIT Hamirpur · Offline-ready, private cloud sync
       </p>
     </main>
   );

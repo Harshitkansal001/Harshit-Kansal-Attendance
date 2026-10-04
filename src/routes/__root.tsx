@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "author", content: "Harshit Kansal" },
+      { name: "application-name", content: "Attendance Tracker" },
       { name: "theme-color", content: "#121212" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -143,6 +143,12 @@ function ThemeAndServices() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const profileName = useAppState().settings.name.trim() || "User";
+  const initials = profileName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "U";
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -152,8 +158,8 @@ function RootComponent() {
       <div className="app-shell">
         <aside className="desktop-sidebar">
           <Link to="/" className="brand-block">
-            <span className="brand-mark">HK</span>
-            <span><strong>Harshit Kansal</strong><small>Self Attendance</small></span>
+            <span className="brand-mark">AT</span>
+            <span><strong>Attendance</strong><small>Student tracker</small></span>
           </Link>
           <nav className="desktop-nav" aria-label="Main">
             <Link to="/" activeOptions={{ exact: true }} activeProps={{ className: "nav-item active" }} className="nav-item">Home</Link>
@@ -162,16 +168,19 @@ function RootComponent() {
             <Link to="/settings" activeProps={{ className: "nav-item active" }} className="nav-item">Settings</Link>
           </nav>
           <div className="sidebar-profile">
-            <div className="profile-avatar">HK</div>
-            <div><strong>Harshit Kansal</strong><span>NIT Hamirpur</span><span>B.Tech CSE Dual Degree</span></div>
+            <div className="profile-avatar">{initials}</div>
+            <div><strong>{profileName}</strong><span>NIT Hamirpur</span></div>
           </div>
         </aside>
         <div className="app-main">
           <header className="topbar">
             <div><p className="eyebrow">NIT HAMIRPUR</p><h1>Attendance tracker</h1></div>
-            <div className="topbar-user"><span className="profile-avatar small">HK</span><span>Harshit Kansal</span></div>
+            <div className="topbar-user"><span className="profile-avatar small">{initials}</span><span>{profileName}</span></div>
           </header>
           <main className="page-content"><Outlet /></main>
+          <footer className="mx-auto max-w-[1480px] px-4 pb-24 pt-2 text-center text-[10px] text-muted-foreground md:px-8 md:pb-5">
+            Created by Harshit Kansal
+          </footer>
         </div>
       </div>
       <BottomNav />
