@@ -32,7 +32,6 @@ It replaces manual attendance calculations, scattered notes, and spreadsheets wi
 
 <p align="center">
   <img src="https://placehold.co/1200x650/111827/ffffff?text=NIT+Self+Attendance+Dashboard" alt="NIT Self Attendance Dashboard" width="90%" />
-</p>«💡 Replace the preview above with an actual screenshot of your application for the best GitHub presentation.»
 
 ---
 
