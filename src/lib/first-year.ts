@@ -36,7 +36,7 @@ const singleClass = (
 ): SingleClass => ({
   day,
   start,
-  end,
+  ...(end !== undefined ? { end } : {}),
   code,
   teacher,
 });
